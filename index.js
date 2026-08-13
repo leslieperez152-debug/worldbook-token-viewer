@@ -349,23 +349,24 @@ function closeViewer() {
     $(`#${MODAL_ID}`).removeClass('wbtv-open');
 }
 
-async function renderSettingsPanel() {
-    if (!$(SETTINGS_CONTAINER).length) {
+function addWandButton() {
+    const wand = document.getElementById('extensionsMenu');
+    if (!wand) {
         return;
     }
 
-    if ($('#wbtv_settings').length) {
+    if ($('#wbtv_wand_button').length) {
         return;
     }
 
-    const html = await context.renderExtensionTemplateAsync(
-        TEMPLATE_EXTENSION_NAME,
-        'settings',
-        {},
-    );
-
-    $(SETTINGS_CONTAINER).append(html);
-    $('#wbtv_open_button').on('click', () => openViewer());
+    const button = document.createElement('div');
+    button.id = 'wbtv_wand_button';
+    button.className = 'list-group-item flex-container flexGap5 interactable wbtv-wand-button';
+    button.tabIndex = 0;
+    button.title = '世界书 Token 查看器';
+    button.innerHTML = '<i class="fa-solid fa-book-open"></i><span>世界书 Token 查看器</span>';
+    button.addEventListener('click', () => openViewer());
+    wand.appendChild(button);
 }
 
 function makeEnumProvider() {
@@ -453,14 +454,10 @@ async function init() {
 
     initialized = true;
 
-    if ($(SETTINGS_CONTAINER).length) {
-        await renderSettingsPanel();
-    }
+    addWandButton();
 
-    context.eventSource.on(context.eventTypes.APP_READY, async () => {
-        if ($(SETTINGS_CONTAINER).length) {
-            await renderSettingsPanel();
-        }
+    context.eventSource.on(context.eventTypes.APP_READY, () => {
+        addWandButton();
     });
 }
 

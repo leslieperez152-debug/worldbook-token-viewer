@@ -19,14 +19,14 @@
 
    `D:\software\scoop\apps\TauriTavern\current\data\default-user\extensions\worldbook-token-viewer`
 
-3. 重新打开 TauriTavern，在扩展抽屉中找到 “世界书 Token 查看器”。
+3. 重新打开 TauriTavern。
 
 ## 使用
 
-### 界面方式
+### 魔法棒菜单方式
 
-1. 打开扩展抽屉。
-2. 点击 “打开查看器”。
+1. 点击聊天栏旁的魔法棒按钮。
+2. 在菜单里点击 “世界书 Token 查看器”。
 3. 从下拉框选择一个世界书。
 4. 点击 “计算 token”。
 5. 在左侧列表中点击某个词条的 “编辑”，右侧会显示该词条内容。
