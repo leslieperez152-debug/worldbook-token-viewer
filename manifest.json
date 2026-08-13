@@ -6,5 +6,5 @@
   "description": "查看 TauriTavern / SillyTavern 已导入世界书，统计每个词条 token，并可直接编辑世界书内容。",
   "js": "index.js",
   "css": "style.css",
-  "homePage": ""
+  "homePage": "https://github.com/leslieperez152-debug/worldbook-token-viewer"
 }
