@@ -2,7 +2,7 @@
   "display_name": "世界书token查看器",
   "loading_order": 100,
   "author": "Codex",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "查看 TauriTavern / SillyTavern 已导入世界书，统计每个词条 token，并可直接编辑世界书内容。",
   "js": "index.js",
   "css": "style.css",

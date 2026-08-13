@@ -1,4 +1,5 @@
 import { getContext } from '../../../st-context.js';
+import { world_names } from '../../../world-info.js';
 
 const COMMAND_NAME = 'wi-tokens';
 const COMMAND_ALIASES = ['worldbook-tokens', 'witokens'];
@@ -38,6 +39,18 @@ function isExtensionEnabled() {
     return getSettings().enabled !== false;
 }
 
+function getWorldbookNames() {
+    if (Array.isArray(world_names)) {
+        return [...world_names];
+    }
+
+    if (typeof context?.getWorldInfoNames === 'function') {
+        return context.getWorldInfoNames();
+    }
+
+    return [];
+}
+
 function applyEnabledState() {
     const enabled = isExtensionEnabled();
     $('#wbtv_wand_button').toggle(enabled);
@@ -49,7 +62,7 @@ function applyEnabledState() {
 
 function debugExtension() {
     const settings = getSettings();
-    const worldbookNames = context.getWorldInfoNames();
+    const worldbookNames = getWorldbookNames();
     console.log('[世界书token查看器] settings:', settings);
     console.log('[世界书token查看器] worldbooks:', worldbookNames);
     toastr.info(`扩展状态：${settings.enabled ? '已启用' : '已停用'}；已读取世界书 ${worldbookNames.length} 个。`, '世界书 Token 查看器');
@@ -264,7 +277,7 @@ async function refreshWorldbookList(preferredName) {
     }
 
     const select = $('#wbtv_select');
-    const names = context.getWorldInfoNames();
+    const names = getWorldbookNames();
     const selected = preferredName || String(select.val() ?? '');
 
     select.empty();
@@ -526,7 +539,7 @@ async function renderSettingsPanel() {
 }
 
 function makeEnumProvider() {
-    return () => context.getWorldInfoNames().map((name) => (
+    return () => getWorldbookNames().map((name) => (
         new context.SlashCommandEnumValue(name, name, 'enum', '📚')
     ));
 }
@@ -561,7 +574,7 @@ async function commandCallback(namedArguments, unnamedArguments) {
         : String(unnamedArguments ?? '').trim();
 
     const requestedName = directName || unnamedName;
-    const names = context.getWorldInfoNames();
+    const names = getWorldbookNames();
 
     if (!names.length) {
         await context.Popup.show.text('世界书 Token 查看器', '当前没有可读取的世界书。', {
