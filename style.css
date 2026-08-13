@@ -1,0 +1,82 @@
+#wbtc_settings {
+    margin-bottom: 12px;
+}
+
+.wbtc-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.wbtc-select {
+    flex: 1 1 220px;
+    min-width: 180px;
+}
+
+.wbtc-results {
+    font-size: 0.95em;
+}
+
+.wbtc-summary {
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.wbtc-table-wrap {
+    max-height: 58vh;
+    overflow: auto;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 8px;
+}
+
+.wbtc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.wbtc-table thead {
+    position: sticky;
+    top: 0;
+    background: #1f1f1f;
+    color: #eee;
+}
+
+.wbtc-cell {
+    padding: 7px 8px;
+    text-align: left;
+}
+
+.wbtc-cell--status {
+    width: 72px;
+    text-align: center;
+}
+
+.wbtc-cell--tokens {
+    width: 90px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.wbtc-light {
+    font-weight: 600;
+}
+
+.wbtc-light--blue {
+    color: #4da3ff;
+}
+
+.wbtc-light--green {
+    color: #4caf50;
+}
+
+.wbtc-light--off {
+    color: #999;
+}
+
+.wbtc-empty {
+    padding: 14px;
+    color: #999;
+    text-align: center;
+}

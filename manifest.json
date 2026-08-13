@@ -1,0 +1,10 @@
+{
+  "display_name": "Worldbook Token Counter",
+  "loading_order": 100,
+  "author": "Codex",
+  "version": "1.1.0",
+  "description": "统计 TauriTavern / SillyTavern 中已导入世界书的每个词条 token，并分别给出蓝灯、蓝灯+绿灯、全部词条的总量。",
+  "js": "index.js",
+  "css": "style.css",
+  "homePage": ""
+}
