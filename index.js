@@ -18,6 +18,10 @@ const SETTINGS_KEY = 'worldbook-token-viewer';
 const defaultSettings = Object.freeze({ enabled: true });
 
 function getSettings() {
+    if (!context.extensionSettings || typeof context.extensionSettings !== 'object') {
+        context.extensionSettings = {};
+    }
+
     if (!context.extensionSettings[SETTINGS_KEY]) {
         context.extensionSettings[SETTINGS_KEY] = JSON.parse(JSON.stringify(defaultSettings));
     }
@@ -437,16 +441,21 @@ function ensureModal() {
     });
 }
 async function openViewer(preferredName) {
-    if (!isExtensionEnabled()) {
-        toastr.warning('扩展未启用，请先在扩展设置中打开“世界书 Token 查看器”。', '世界书 Token 查看器');
-        return;
+    try {
+        if (!isExtensionEnabled()) {
+            toastr.warning('扩展未启用，请先在扩展设置中打开“世界书 Token 查看器”。', '世界书 Token 查看器');
+            return;
+        }
+        ensureModal();
+        $('#wbtv_worldbook_search').val('');
+        $('#wbtv_entry_search').val('');
+        currentSearchQuery = '';
+        await refreshWorldbookList(preferredName);
+        $(`#${MODAL_ID}`).addClass('wbtv-open');
+    } catch (error) {
+        console.error('[世界书token查看器] 打开查看器失败', error);
+        toastr.error(`打开查看器失败：${error?.message ?? error}`, '世界书 Token 查看器');
     }
-    ensureModal();
-    $('#wbtv_worldbook_search').val('');
-    $('#wbtv_entry_search').val('');
-    currentSearchQuery = '';
-    await refreshWorldbookList(preferredName);
-    $(`#${MODAL_ID}`).addClass('wbtv-open');
 }
 
 function closeViewer() {
@@ -503,7 +512,9 @@ async function renderSettingsPanel() {
         .prop('checked', getSettings().enabled)
         .on('input', (event) => {
             getSettings().enabled = Boolean($(event.target).prop('checked'));
-            context.saveSettingsDebounced();
+            if (typeof context.saveSettingsDebounced === 'function') {
+                context.saveSettingsDebounced();
+            }
             applyEnabledState();
         });
 
