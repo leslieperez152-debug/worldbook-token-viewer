@@ -10,6 +10,16 @@
 
 ## 安装
 
+### 方式一：从 Git URL 安装（推荐）
+
+在 SillyTavern / TauriTavern 的扩展模块里，选择「从 Git URL 安装」，输入：
+
+```text
+https://github.com/leslieperez152-debug/worldbook-token-viewer.git
+```
+
+### 方式二：手动放置
+
 1. 关闭 TauriTavern。
 2. 将本仓库文件夹 `worldbook-token-viewer` 放到 TauriTavern 的本地扩展目录：
 
