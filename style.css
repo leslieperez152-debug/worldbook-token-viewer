@@ -73,6 +73,11 @@
     min-width: 200px;
 }
 
+.wbtv-search {
+    flex: 1 1 180px;
+    min-width: 150px;
+}
+
 .wbtv-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);

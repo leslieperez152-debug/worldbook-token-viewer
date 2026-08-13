@@ -141,14 +141,14 @@ function escapeHtml(value) {
         .replaceAll("'", '&#039;');
 }
 
-function buildStatsHtml(name, items, blueTotal, activeTotal, allTotal) {
+function buildStatsHtml(name, items, blueTotal, activeTotal, allTotal, totalCount = items.length, isSearching = false) {
     const statusMap = {
         blue: '<span class="wbtv-light wbtv-light--blue">蓝灯</span>',
         green: '<span class="wbtv-light wbtv-light--green">绿灯</span>',
         off: '<span class="wbtv-light wbtv-light--off">停用</span>',
     };
 
-    const body = items.map((item, index) => {
+    const body = items.map((item) => {
         const status = statusMap[item.light] ?? statusMap.off;
         const label = item.label;
 
@@ -158,15 +158,19 @@ function buildStatsHtml(name, items, blueTotal, activeTotal, allTotal) {
                 <td class="wbtv-cell" title="${escapeHtml(label)}">${escapeHtml(label)}</td>
                 <td class="wbtv-cell wbtv-cell--tokens">${item.tokens}</td>
                 <td class="wbtv-cell wbtv-cell--actions">
-                    <button type="button" class="menu_button wbtv-edit-entry" data-idx="${index}">编辑</button>
+                    <button type="button" class="menu_button wbtv-edit-entry" data-key="${escapeHtml(item.key)}">编辑</button>
                 </td>
             </tr>`;
     }).join('');
 
+    const countLine = isSearching
+        ? `<div><strong>匹配词条数：</strong>${items.length} / ${totalCount}</div>`
+        : `<div><strong>词条数：</strong>${items.length}</div>`;
+
     return `
         <div class="wbtv-summary">
             <div><strong>世界书：</strong>${escapeHtml(name)}</div>
-            <div><strong>词条数：</strong>${items.length}</div>
+            ${countLine}
             <div><strong>蓝灯（常量）总 token：</strong>${blueTotal}</div>
             <div><strong>蓝灯 + 绿灯（已启用）总 token：</strong>${activeTotal}</div>
             <div><strong>全部词条（含停用）总 token：</strong>${allTotal}</div>
@@ -186,6 +190,67 @@ function buildStatsHtml(name, items, blueTotal, activeTotal, allTotal) {
         </div>`;
 }
 
+function computeTotals(items) {
+    let blueTotal = 0;
+    let activeTotal = 0;
+    let allTotal = 0;
+
+    for (const item of items) {
+        allTotal += item.tokens;
+        if (item.light !== 'off') {
+            activeTotal += item.tokens;
+        }
+        if (item.light === 'blue') {
+            blueTotal += item.tokens;
+        }
+    }
+
+    return { blueTotal, activeTotal, allTotal };
+}
+
+function getFilteredItems() {
+    const query = currentSearchQuery.trim().toLowerCase();
+    if (!query) {
+        return currentSortedItems;
+    }
+
+    return currentSortedItems.filter((item) => {
+        const label = String(item.label ?? '').toLowerCase();
+        const content = String(item.content ?? '').toLowerCase();
+        return label.includes(query) || content.includes(query);
+    });
+}
+
+function renderResults() {
+    if (!currentSortedItems.length) {
+        $('#wbtv_results').html('<div class="wbtv-empty">当前没有可显示的词条。</div>');
+        return;
+    }
+
+    const query = String($('#wbtv_entry_search').val() ?? '').trim();
+    currentSearchQuery = query;
+    const items = getFilteredItems();
+    const totals = computeTotals(items);
+    const isSearching = Boolean(query);
+
+    $('#wbtv_results').html(buildStatsHtml(
+        currentName,
+        items,
+        totals.blueTotal,
+        totals.activeTotal,
+        totals.allTotal,
+        currentSortedItems.length,
+        isSearching,
+    ));
+}
+
+function applyWorldbookFilter() {
+    const query = String($('#wbtv_worldbook_search').val() ?? '').trim().toLowerCase();
+    $('#wbtv_select option').each(function () {
+        const text = String($(this).text()).toLowerCase();
+        $(this).toggle(text.includes(query));
+    });
+}
 async function refreshWorldbookList(preferredName) {
     try {
         await context.updateWorldInfoList();
@@ -214,6 +279,8 @@ async function refreshWorldbookList(preferredName) {
         }
         select.append(option);
     });
+
+    applyWorldbookFilter();
 }
 
 async function analyzeSelected() {
@@ -235,9 +302,6 @@ async function analyzeSelected() {
     }
 
     const items = [];
-    let blueTotal = 0;
-    let activeTotal = 0;
-    let allTotal = 0;
 
     for (const item of sorted) {
         const content = String(item.entry?.content ?? '');
@@ -246,19 +310,12 @@ async function analyzeSelected() {
         const constant = isEntryConstant(item.entry);
         const tokenNumber = Number(tokens) || 0;
 
-        allTotal += tokenNumber;
-        if (enabled) {
-            activeTotal += tokenNumber;
-        }
-        if (enabled && constant) {
-            blueTotal += tokenNumber;
-        }
-
         items.push({
             ...item,
             label: getEntryLabel(item.entry, item.index),
             tokens: tokenNumber,
             light: getEntryLight(item.entry),
+            content,
         });
     }
 
@@ -266,11 +323,12 @@ async function analyzeSelected() {
     currentData = data;
     currentSortedItems = items;
     currentEditKey = null;
+    $('#wbtv_entry_search').val('');
+    currentSearchQuery = '';
 
-    $('#wbtv_results').html(buildStatsHtml(name, items, blueTotal, activeTotal, allTotal));
+    renderResults();
     resetEditor();
 }
-
 function findCurrentItem(key) {
     return currentSortedItems.find((item) => item.key === key) ?? null;
 }
@@ -334,9 +392,11 @@ function ensureModal() {
                 <button type="button" class="wbtv-close" title="关闭">×</button>
             </div>
             <div class="wbtv-toolbar">
+                <input id="wbtv_worldbook_search" class="wbtv-search" type="search" placeholder="搜索世界书…">
                 <select id="wbtv_select" class="wbtv-select"></select>
                 <button type="button" id="wbtv_analyze" class="menu_button">计算 token</button>
                 <button type="button" id="wbtv_refresh" class="menu_button">刷新列表</button>
+                <input id="wbtv_entry_search" class="wbtv-search" type="search" placeholder="搜索词条名或内容…">
             </div>
             <div class="wbtv-layout">
                 <div id="wbtv_results" class="wbtv-results"></div>
@@ -365,22 +425,26 @@ function ensureModal() {
     });
 
     $('#wbtv_analyze').on('click', analyzeSelected);
-
     $('#wbtv_save').on('click', saveCurrentEntry);
 
+    $('#wbtv_worldbook_search').on('input', applyWorldbookFilter);
+    $('#wbtv_entry_search').on('input', renderResults);
+
     $('#wbtv_results').on('click', '.wbtv-edit-entry', (event) => {
-        const index = Number(event.currentTarget.dataset.idx);
-        const item = currentSortedItems[index];
+        const key = event.currentTarget.dataset.key;
+        const item = findCurrentItem(key);
         openEditorForItem(item);
     });
 }
-
 async function openViewer(preferredName) {
     if (!isExtensionEnabled()) {
         toastr.warning('扩展未启用，请先在扩展设置中打开“世界书 Token 查看器”。', '世界书 Token 查看器');
         return;
     }
     ensureModal();
+    $('#wbtv_worldbook_search').val('');
+    $('#wbtv_entry_search').val('');
+    currentSearchQuery = '';
     await refreshWorldbookList(preferredName);
     $(`#${MODAL_ID}`).addClass('wbtv-open');
 }
