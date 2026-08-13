@@ -13,6 +13,7 @@ let currentName = '';
 let currentData = null;
 let currentSortedItems = [];
 let currentEditKey = null;
+let currentSearchQuery = '';
 
 const SETTINGS_KEY = 'worldbook-token-viewer';
 const defaultSettings = Object.freeze({ enabled: true });
