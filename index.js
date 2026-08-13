@@ -19,10 +19,10 @@ const defaultSettings = Object.freeze({ enabled: true });
 
 function getSettings() {
     if (!context.extensionSettings[SETTINGS_KEY]) {
-        context.extensionSettings[SETTINGS_KEY] = structuredClone(defaultSettings);
+        context.extensionSettings[SETTINGS_KEY] = JSON.parse(JSON.stringify(defaultSettings));
     }
     for (const key of Object.keys(defaultSettings)) {
-        if (!Object.hasOwn(context.extensionSettings[SETTINGS_KEY], key)) {
+        if (!Object.prototype.hasOwnProperty.call(context.extensionSettings[SETTINGS_KEY], key)) {
             context.extensionSettings[SETTINGS_KEY][key] = defaultSettings[key];
         }
     }
@@ -134,11 +134,11 @@ function getEntryLight(entry) {
 
 function escapeHtml(value) {
     return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function buildStatsHtml(name, items, blueTotal, activeTotal, allTotal, totalCount = items.length, isSearching = false) {
