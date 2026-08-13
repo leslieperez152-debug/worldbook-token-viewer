@@ -270,12 +270,13 @@ async function saveCurrentEntry() {
         return;
     }
 
+    const savedKey = currentEditKey;
     item.entry.content = $('#wbtv_editor_text').val();
     await context.saveWorldInfo(currentName, currentData, true);
 
     $('#wbtv_save_status').text('已保存。');
     await analyzeSelected();
-    const refreshed = findCurrentItem(currentEditKey);
+    const refreshed = findCurrentItem(savedKey);
     if (refreshed) {
         openEditorForItem(refreshed);
         $('#wbtv_save_status').text('已保存并重新统计。');
