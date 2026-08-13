@@ -14,6 +14,42 @@ let currentData = null;
 let currentSortedItems = [];
 let currentEditKey = null;
 
+const SETTINGS_KEY = 'worldbook-token-viewer';
+const defaultSettings = Object.freeze({ enabled: true });
+
+function getSettings() {
+    if (!context.extensionSettings[SETTINGS_KEY]) {
+        context.extensionSettings[SETTINGS_KEY] = structuredClone(defaultSettings);
+    }
+    for (const key of Object.keys(defaultSettings)) {
+        if (!Object.hasOwn(context.extensionSettings[SETTINGS_KEY], key)) {
+            context.extensionSettings[SETTINGS_KEY][key] = defaultSettings[key];
+        }
+    }
+    return context.extensionSettings[SETTINGS_KEY];
+}
+
+function isExtensionEnabled() {
+    return getSettings().enabled !== false;
+}
+
+function applyEnabledState() {
+    const enabled = isExtensionEnabled();
+    $('#wbtv_wand_button').toggle(enabled);
+    $('#wbtv_open_button, #wbtv_debug_button').prop('disabled', !enabled);
+    if (!enabled) {
+        closeViewer();
+    }
+}
+
+function debugExtension() {
+    const settings = getSettings();
+    const worldbookNames = context.getWorldInfoNames();
+    console.log('[世界书token查看器] settings:', settings);
+    console.log('[世界书token查看器] worldbooks:', worldbookNames);
+    toastr.info(`扩展状态：${settings.enabled ? '已启用' : '已停用'}；已读取世界书 ${worldbookNames.length} 个。`, '世界书 Token 查看器');
+}
+
 function normalizeEntryItems(data) {
     if (!data || typeof data !== 'object') {
         return [];
@@ -340,6 +376,10 @@ function ensureModal() {
 }
 
 async function openViewer(preferredName) {
+    if (!isExtensionEnabled()) {
+        toastr.warning('扩展未启用，请先在扩展设置中打开“世界书 Token 查看器”。', '世界书 Token 查看器');
+        return;
+    }
     ensureModal();
     await refreshWorldbookList(preferredName);
     $(`#${MODAL_ID}`).addClass('wbtv-open');
@@ -368,6 +408,10 @@ function addWandButton() {
     button.addEventListener('click', () => openViewer());
     wand.appendChild(button);
 
+    if (!isExtensionEnabled()) {
+        button.style.display = 'none';
+    }
+
     const menuButton = $('#extensionsMenuButton');
     if (menuButton.length) {
         menuButton.css('display', 'flex');
@@ -390,7 +434,19 @@ async function renderSettingsPanel() {
     );
 
     $(SETTINGS_CONTAINER).append(html);
+
+    $('#wbtv_enabled')
+        .prop('checked', getSettings().enabled)
+        .on('input', (event) => {
+            getSettings().enabled = Boolean($(event.target).prop('checked'));
+            context.saveSettingsDebounced();
+            applyEnabledState();
+        });
+
     $('#wbtv_open_button').on('click', () => openViewer());
+    $('#wbtv_debug_button').on('click', debugExtension);
+
+    applyEnabledState();
 }
 
 function makeEnumProvider() {
@@ -484,12 +540,16 @@ async function init() {
         await renderSettingsPanel();
     }
 
+    applyEnabledState();
+
     context.eventSource.on(context.eventTypes.APP_READY, async () => {
         addWandButton();
 
         if ($(SETTINGS_CONTAINER).length) {
             await renderSettingsPanel();
         }
+
+        applyEnabledState();
     });
 }
 

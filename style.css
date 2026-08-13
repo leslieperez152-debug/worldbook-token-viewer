@@ -2,11 +2,12 @@
     margin-bottom: 12px;
 }
 
-.wbtv-settings-row {
+.wbtv-settings-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .wbtv-overlay {

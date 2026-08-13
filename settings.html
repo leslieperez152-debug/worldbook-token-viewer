@@ -1,6 +1,19 @@
-<div id="wbtv_settings" class="wbtv-settings">
-    <div class="wbtv-settings-row">
-        <span>世界书 Token 查看器</span>
-        <button id="wbtv_open_button" class="menu_button" type="button">打开查看器</button>
+<div id="wbtv_settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>世界书 Token 查看器</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <label class="flex-container" title="是否启用扩展">
+                <input type="checkbox" id="wbtv_enabled">
+                <span>启用扩展</span>
+            </label>
+            <hr>
+            <div class="wbtv-settings-actions">
+                <button id="wbtv_open_button" class="menu_button" type="button">打开查看器</button>
+                <button id="wbtv_debug_button" class="menu_button" type="button">调试</button>
+            </div>
+        </div>
     </div>
 </div>
