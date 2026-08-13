@@ -367,6 +367,11 @@ function addWandButton() {
     button.innerHTML = '<i class="fa-solid fa-book-open"></i><span>世界书 Token 查看器</span>';
     button.addEventListener('click', () => openViewer());
     wand.appendChild(button);
+
+    const menuButton = $('#extensionsMenuButton');
+    if (menuButton.length) {
+        menuButton.css('display', 'flex');
+    }
 }
 
 function makeEnumProvider() {
