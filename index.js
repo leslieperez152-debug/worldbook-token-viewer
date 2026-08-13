@@ -374,6 +374,25 @@ function addWandButton() {
     }
 }
 
+async function renderSettingsPanel() {
+    if (!$(SETTINGS_CONTAINER).length) {
+        return;
+    }
+
+    if ($('#wbtv_settings').length) {
+        return;
+    }
+
+    const html = await context.renderExtensionTemplateAsync(
+        TEMPLATE_EXTENSION_NAME,
+        'settings',
+        {},
+    );
+
+    $(SETTINGS_CONTAINER).append(html);
+    $('#wbtv_open_button').on('click', () => openViewer());
+}
+
 function makeEnumProvider() {
     return () => context.getWorldInfoNames().map((name) => (
         new context.SlashCommandEnumValue(name, name, 'enum', '📚')
@@ -461,8 +480,16 @@ async function init() {
 
     addWandButton();
 
-    context.eventSource.on(context.eventTypes.APP_READY, () => {
+    if ($(SETTINGS_CONTAINER).length) {
+        await renderSettingsPanel();
+    }
+
+    context.eventSource.on(context.eventTypes.APP_READY, async () => {
         addWandButton();
+
+        if ($(SETTINGS_CONTAINER).length) {
+            await renderSettingsPanel();
+        }
     });
 }
 
